@@ -23,7 +23,7 @@ async function createParcel(req, res) {
       weight,
       selectedDate,
       paymentMethod,
-      upiId,
+      paymentStatus,
     } = req.body;
 
     const totalPrice = calculatePrice(deliveryType, weight, priority);
@@ -62,9 +62,8 @@ async function createParcel(req, res) {
         weight,
         scheduleDate: selectedDate,
         paymentMethod,
-        upiId: paymentMethod === "upi" ? upiId : null,
         totalPrice: totalPrice,
-        paymentStatus: paymentMethod === "cod" ? "pending" : "processing",
+        paymentStatus: paymentStatus,
       },
       timeline: {
         status: "order_placed",

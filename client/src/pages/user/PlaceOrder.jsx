@@ -129,6 +129,7 @@ const handleSubmit = async () => {
     if (formData.paymentMethod === "cash") {
       await createParcel({
         ...formData,
+        paymentMethod: "cash",
         paymentStatus: "pending",
       });
 
@@ -198,7 +199,7 @@ const handleSubmit = async () => {
           await createParcel({
             ...formData,
             paymentMethod: "online",
-            paymentStatus: "paid",
+            paymentStatus: "completed",
             paymentId: response.razorpay_payment_id,
             orderId: response.razorpay_order_id,
             signature: response.razorpay_signature,
