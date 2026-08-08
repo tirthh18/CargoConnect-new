@@ -1,4 +1,3 @@
-const { json } = require("express");
 const Parcel = require("../models/Parcel");
 const calculatePrice = require("../utils/calculatePrice");
 const getCoordinates = require("../utils/getCoordinates");
@@ -28,18 +27,34 @@ async function createParcel(req, res) {
 
     const totalPrice = calculatePrice(deliveryType, weight, priority);
 
-    const pickupCoordinates = await getCoordinates(pickupAddress,pickupCity,"Gujarat","India",pickupPincode,);
-    const dropCoordinates = await getCoordinates(dropAddress,dropCity,"Gujarat","India",dropPincode,);
+    const pickupCoordinates = await getCoordinates(
+      pickupAddress,
+      pickupCity,
+      "Gujarat",
+      "India",
+      pickupPincode,
+    );
 
+    const dropCoordinates = await getCoordinates(
+      dropAddress,
+      dropCity,
+      "Gujarat",
+      "India",
+      dropPincode,
+    );
 
-    if (!pickupCoordinates || !dropCoordinates) 
-      return res.status(400).json({message: "Invalid pickup or delivery address.",});
-    
+    if (!pickupCoordinates || !dropCoordinates) {
+      return res.status(400).json({
+        message: "Invalid pickup or delivery address.",
+      });
+    }
+
     const newParcel = new Parcel({
       trackingNumber: generateTrackingNumber(),
       userId: req.user.id,
       userName: req.user.name,
       status: "pending",
+
       pickup: {
         name: senderName,
         mobile: senderMobile,
@@ -48,6 +63,7 @@ async function createParcel(req, res) {
         pincode: pickupPincode,
         coordinates: pickupCoordinates,
       },
+
       delivery: {
         name: receiverName,
         mobile: receiverMobile,
@@ -56,19 +72,23 @@ async function createParcel(req, res) {
         pincode: dropPincode,
         coordinates: dropCoordinates,
       },
+
       parcelDetails: {
         priority,
         deliveryType,
         weight,
         scheduleDate: selectedDate,
         paymentMethod,
-        totalPrice: totalPrice,
-        paymentStatus: paymentStatus,
+        totalPrice,
+        paymentStatus,
       },
-      timeline: {
-        status: "order_placed",
-        timestamp: Date.now(),
-      },
+
+      timeline: [
+        {
+          status: "order_placed",
+          timestamp: Date.now(),
+        },
+      ],
     });
 
     await newParcel.save();
@@ -78,36 +98,64 @@ async function createParcel(req, res) {
       message: "Order placed successfully",
       parcel: newParcel,
     });
-
   } catch (error) {
     console.error("Error creating parcel:", error);
-    res.status(500).json({success: false,message: "Failed to create parcel order",error: error.message,});
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to create parcel order",
+      error: error.message,
+    });
   }
 }
-
 
 async function getUserParcels(req, res) {
   try {
     const userId = req.user.id;
-   
-    const parcels = await Parcel.find({ userId });
-   
+
+    /*
+     * Populate both possible agent fields.
+     *
+     * pickup.agent  -> Pickup Agent
+     * delivery.agent -> Delivery Agent
+     *
+     * The database stores only the User ObjectId.
+     * populate() gets the actual User document.
+     */
+
+    const parcels = await Parcel.find({ userId })
+      .populate("pickup.agent", "name email")
+      .populate("delivery.agent", "name email")
+      .sort({ createdAt: -1 });
+
     const totalOrders = parcels.length;
-    const currentOrders = parcels.filter((p) => p.status !== "delivered" && p.status !== "cancelled").length;
-    const deliveredOrders = parcels.filter((p) => p.status === "delivered").length;
-    const cancelledOrders = parcels.filter((p) => p.status === "cancelled").length;
+
+    const currentOrders = parcels.filter(
+      (p) => p.status !== "delivered" && p.status !== "cancelled",
+    ).length;
+
+    const deliveredOrders = parcels.filter(
+      (p) => p.status === "delivered",
+    ).length;
+
+    const cancelledOrders = parcels.filter(
+      (p) => p.status === "cancelled",
+    ).length;
 
     const totalSpent = parcels
       .filter((p) => p.status !== "cancelled")
       .reduce((sum, p) => sum + p.parcelDetails.totalPrice, 0);
 
     const monthlyData = Array.from({ length: 12 }, (_, i) => ({
-      month: new Date(0, i).toLocaleString("default", { month: "short" }),
+      month: new Date(0, i).toLocaleString("default", {
+        month: "short",
+      }),
       orders: 0,
     }));
 
     parcels.forEach((p) => {
       const month = new Date(p.createdAt).getMonth();
+
       monthlyData[month].orders++;
     });
 
@@ -121,36 +169,47 @@ async function getUserParcels(req, res) {
       parcels,
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Get User Parcels Error:", err);
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 }
-
 
 async function cancelparcel(req, res) {
   try {
     const parcel = await Parcel.findById(req.params.id);
+
     if (!parcel) {
-      return res.status(404).json({ message: "Parcel not found" });
+      return res.status(404).json({
+        message: "Parcel not found",
+      });
     }
 
     if (parcel.status !== "pending") {
-      return res
-        .status(400)
-        .json({ message: "Cannot cancel a parcel after pickup" });
+      return res.status(400).json({
+        message: "Cannot cancel a parcel after pickup",
+      });
     }
 
     updateStatus(parcel, "cancelled");
 
-    res.status(200).json({ message: "Parcel cancelled", parcel });
+    res.status(200).json({
+      message: "Parcel cancelled",
+      parcel,
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 }
 
 module.exports = {
   createParcel,
   getUserParcels,
-  cancelparcel
+  cancelparcel,
 };

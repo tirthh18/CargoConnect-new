@@ -1,7 +1,19 @@
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import {useMutation,useQuery,useQueryClient,} from "@tanstack/react-query";
+import {
+  getAgents,
+  getAgentParcels,
+  updateParcelStatus,
+  getOptimizedRoute,
+} from "../services/agentService";
 
-import {getAgents, getAgentParcels, updateParcelStatus, getOptimizedRoute} from "../services/agentService";
+// ======================================================
+// GET AGENTS
+// ======================================================
 
 export const useGetAgents = () => {
   return useQuery({
@@ -9,6 +21,10 @@ export const useGetAgents = () => {
     queryFn: getAgents,
   });
 };
+
+// ======================================================
+// GET AGENT PARCELS
+// ======================================================
 
 export const useAgentParcels = (agentId) => {
   return useQuery({
@@ -19,38 +35,51 @@ export const useAgentParcels = (agentId) => {
   });
 };
 
+// ======================================================
+// OPTIMIZE ROUTE
+// ======================================================
+
 export function useOptimizeRoute(agentId) {
   return useQuery({
     queryKey: ["optimized-route", agentId],
-    queryFn: () =>getOptimizedRoute(agentId),
+    queryFn: () => getOptimizedRoute(agentId),
     enabled: false,
   });
 }
+
+// ======================================================
+// UPDATE PARCEL STATUS
+// ======================================================
 
 export function useUpdateParcelStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, status }) =>
-      updateParcelStatus(id, status),
+    mutationFn: ({ id, status, agentId }) =>
+      updateParcelStatus(
+        id,
+        status,
+        agentId
+      ),
 
     onSuccess: async (_, variables) => {
-
-      // Refresh Route Page
+      // Refresh selected agent's parcels
       await queryClient.invalidateQueries({
-        queryKey: ["agent-parcels", variables.agentId],
+        queryKey: [
+          "agent-parcels",
+          variables.agentId,
+        ],
       });
 
-      // Refresh Admin Dashboard
+      // Refresh admin dashboard
       await queryClient.invalidateQueries({
         queryKey: ["admin-dashboard"],
       });
 
-      // Refresh Admin Parcels
+      // Refresh admin parcels
       await queryClient.invalidateQueries({
         queryKey: ["admin-parcels"],
       });
-
     },
   });
 }

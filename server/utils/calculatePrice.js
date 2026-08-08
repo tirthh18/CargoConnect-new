@@ -1,31 +1,35 @@
 function calculatePrice(deliveryType, weight, priority) {
   let basePrice = 0;
 
-  const weightPrice = {
-    1: 10,
-    5: 25,
-    10: 40,
-    15: 60,
-  };
-
-  basePrice += weightPrice[weight] || 0;
-
-  if (deliveryType === "intercity") {
-    basePrice += 40;
+  if (weight <= 1) {
+    basePrice = 40;
+  } else if (weight <= 5) {
+    basePrice = 60;
+  } else if (weight <= 10) {
+    basePrice = 90;
+  } else if (weight <= 15) {
+    basePrice = 130;
   } else {
-    basePrice += 20;
+    basePrice = 130 + (weight - 15) * 15;
   }
 
-  const priorityPrice = {
-    low: 0,
-    high: 40,
-  };
+  if (deliveryType === "local") {
+    basePrice += 20;
+  } else if (deliveryType === "intercity") {
+    basePrice += 50;
+  }
 
-  basePrice += priorityPrice[priority] || 0;
+  if (priority === "high") {
+    basePrice += 40;
+  }
+
   const insurance = 15;
-  const gst = basePrice * 0.18;
 
-  return Math.round(basePrice + gst + insurance);
+  const gst = (basePrice + insurance) * 0.18;
+
+  const total = basePrice + insurance + gst;
+
+  return Math.round(total);
 }
 
 module.exports = calculatePrice;

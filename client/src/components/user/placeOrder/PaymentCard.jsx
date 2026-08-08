@@ -6,46 +6,53 @@ export default function PaymentCard({
   onSubmit,
 }) {
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 h-fit sticky top-6">
-
-      <h2 className="text-xl font-semibold mb-6">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-fit sticky top-6">
+      <h2 className="text-xl font-bold text-[#1B1B2F] mb-6">
         Payment Summary
       </h2>
 
-      <div className="space-y-4">
-
-        <div className="flex justify-between">
-          <span>Shipping Charge</span>
-          <span>₹ {price.shipping}</span>
+      <div className="space-y-5">
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-600">Shipping Charge</span>
+          <span className="font-medium text-slate-800">
+            ₹ {price.shipping}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span>GST (18%)</span>
-          <span>₹ {price.gst}</span>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-600">GST (18%)</span>
+          <span className="font-medium text-slate-800">
+            ₹ {price.gst}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span>Insurance</span>
-          <span>₹ {price.insurance}</span>
+        <div className="flex justify-between text-sm">
+          <span className="text-slate-600">Insurance</span>
+          <span className="font-medium text-slate-800">
+            ₹ {price.insurance}
+          </span>
         </div>
 
-        <hr />
+        <div className="border-t border-slate-200 pt-5">
+          <div className="flex justify-between">
+            <span className="text-lg font-bold text-[#1B1B2F]">
+              Total
+            </span>
 
-        <div className="flex justify-between text-lg font-bold">
-          <span>Total</span>
-          <span>₹ {price.total}</span>
+            <span className="text-lg font-bold text-[#1B1B2F]">
+              ₹ {price.total}
+            </span>
+          </div>
         </div>
-
       </div>
 
       <button
         onClick={onSubmit}
         disabled={loading}
-        className="mt-8 w-full bg-[#E8734A] hover:bg-[#D9653E] text-white rounded-xl py-3 font-semibold disabled:opacity-50"
+        className="mt-7 w-full bg-[#E8734A] hover:bg-[#D9653E] text-white rounded-xl py-3.5 font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? "Placing Order..." : "Place Order"}
       </button>
-
     </div>
   );
 }

@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   // Restore user on page refresh
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = sessionStorage.getItem("user");
 
     if (storedUser) {
       setUser(JSON.parse(storedUser));
@@ -20,8 +20,8 @@ export const AuthProvider = ({ children }) => {
 
   // Called after successful login
   const login = (token, userData) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData));
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(userData));
 
     setUser(userData);
   };
@@ -31,8 +31,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     queryClient.clear(); // Clear all cached queries
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    sessionStorage.removeItem("token");
+    sessionStorage.removeItem("user");
     setUser(null);
   };
   

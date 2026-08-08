@@ -14,10 +14,13 @@ export default function Navbar() {
       path: "/admin/dashboard",
     },
     {
+      label: "Order History",
+      path: "/admin/orderhistory",
+    },
+    {
       label: "Routes",
       path: "/admin/routes",
     },
-
   ];
 
   const handleLogout = () => {
@@ -26,12 +29,10 @@ export default function Navbar() {
   };
 
   return (
-    <header className="bg-white border-b">
-
-      <div className="px-8 h-20 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-white border-b border-slate-200">
+      <div className="px-8 h-16 flex items-center justify-between">
 
         {/* Left */}
-
         <div className="flex items-center gap-14">
 
           <Link
@@ -46,15 +47,12 @@ export default function Navbar() {
             <span className="text-3xl font-bold text-[#1B1B2F]">
               CargoConnect
             </span>
-
           </Link>
 
           {/* Navigation */}
-
           <nav className="flex gap-10">
 
             {menus.map((menu) => (
-
               <Link
                 key={menu.path}
                 to={menu.path}
@@ -66,32 +64,25 @@ export default function Navbar() {
               >
                 {menu.label}
               </Link>
-
             ))}
 
           </nav>
-
         </div>
 
         {/* Right */}
-
         <div className="flex items-center gap-6">
 
           <p className="text-slate-700 font-medium">
-
             Welcome,&nbsp;
 
             <span className="font-semibold">
-
               {user?.email}
-
             </span>
-
           </p>
 
           <button
             onClick={handleLogout}
-            className="w-11 h-11 rounded-xl border hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-colors"
+            className="w-11 h-11 rounded-xl border border-slate-300 hover:bg-red-50 hover:border-red-200 flex items-center justify-center transition-colors"
           >
             <LogOut
               size={20}
@@ -102,7 +93,6 @@ export default function Navbar() {
         </div>
 
       </div>
-
     </header>
   );
 }

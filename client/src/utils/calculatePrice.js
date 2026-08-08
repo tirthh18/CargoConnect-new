@@ -1,37 +1,46 @@
-// src/utils/calculatePrice.js
+function calculatePrice(deliveryType, weight, priority) {
+  let shipping = 0;
 
-const calculatePrice = (pickupCity, dropCity, weight, priority) => {
-  let basePrice = 0;
-
-  const weightPrice = {
-    5: 25,
-    10: 40,
-    15: 60,
-    20: 80,
-  };
-
-  basePrice += weightPrice[weight] || 0;
-
-  if (pickupCity === dropCity) {
-    basePrice += 40;
+  // Weight charge
+  if (weight <= 1) {
+    shipping = 40;
+  } else if (weight <= 5) {
+    shipping = 60;
+  } else if (weight <= 10) {
+    shipping = 90;
+  } else if (weight <= 15) {
+    shipping = 130;
   } else {
-    basePrice += 20;
+    shipping = 130 + (weight - 15) * 15;
   }
-  const priorityPrice = {
-    low: 0,
-    high: 40,
-  };
 
-  basePrice += priorityPrice[priority] || 0;
-  const gst = basePrice * 0.18;
+  // Delivery type charge
+  if (deliveryType === "local") {
+    shipping += 20;
+  } else if (deliveryType === "intercity") {
+    shipping += 50;
+  }
+
+  // Priority charge
+  if (priority === "high") {
+    shipping += 40;
+  }
+
+  // Insurance
   const insurance = 15;
 
+  // GST
+  const gst = (shipping + insurance) * 0.18;
+
+  // Final total
+  const total = shipping + insurance + gst;
+
   return {
-    shipping: basePrice,
-    gst: Number(gst.toFixed(2)),
+    shipping: Math.round(shipping),
+    gst: Math.round(gst),
     insurance,
-    total: Number((basePrice + gst + insurance).toFixed(2)),
+    total: Math.round(total),
   };
-};
+}
 
 export default calculatePrice;

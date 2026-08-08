@@ -1,12 +1,15 @@
 import React from "react";
 
-const tabs = [
-  { label: "All Orders", value: "all" },
-  { label: "Pending", value: "pending" },
-  { label: "Out for Delivery", value: "out_for_delivery" },
-  { label: "Delivered", value: "delivered" },
-  { label: "Cancelled", value: "cancelled" },
-];
+ const tabs = [
+    { label: "All", value: "all" },
+    { label: "Pending", value: "pending" },
+    { label: "Out for Pickup", value: "out_for_pickup" },
+    { label: "Picked up", value: "picked_up" },
+    { label: "In Transit", value: "in_transit" },
+    { label: "Out for Delivery", value: "out_for_delivery" },
+    { label: "Delivered", value: "delivered" },
+    { label: "Cancelled", value: "cancelled" },
+  ];
 
 export default function StatusTabs({ activeTab, setActiveTab }) {
   return (

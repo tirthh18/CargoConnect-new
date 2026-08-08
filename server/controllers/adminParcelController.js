@@ -9,11 +9,15 @@ const { json } = require("express");
 async function getAdminParcels(req, res) {
   try {
     const adminCity = req.user.office.city;
-    const pickupParcels = await Parcel.find({"pickup.city": adminCity}).populate("pickup.agent", "name").sort({ createdAt: -1 });
 
-    const deliveryParcels = await Parcel.find({
-      "delivery.city": adminCity, status: {$in: ["in_transit", "out_for_delivery"]},
-    }).populate("delivery.agent", "name").sort({ createdAt: -1 });
+    const pickupParcels = await Parcel
+    .find({"pickup.city": adminCity}).populate("pickup.agent", "name")
+    .sort({ createdAt: -1 });
+
+    const deliveryParcels = await Parcel
+    .find({"delivery.city": adminCity, status: {$in: ["in_transit", "out_for_delivery"]},})
+    .populate("delivery.agent", "name")
+    .sort({ createdAt: -1 });
 
 
     const pickupParcelCount = pickupParcels.filter((parcel) => ["pending", "out_for_pickup"].includes(parcel.status)).length;

@@ -7,29 +7,20 @@ async function createOrder (req, res) {
     const {deliveryType, weight, priority } = req.body;
 
     const amount = calculatePrice( deliveryType, weight, priority);
-    console.log(amount);
     const options = {
       amount: amount * 100, 
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };
-    console.log(options);
-    console.log("before create");
+
     const order = await razorpay.orders.create(options);
-    console.log("after create");
 
     res.status(200).json({
       success: true,
       order,
     });
-  } catch (error) {
-  console.log("========== RAZORPAY ERROR ==========");
-  console.log(error);
-  console.log(error.error);
-  console.log(error.statusCode);
-  console.log(error.message);
-  console.log("====================================");
 
+  } catch (error) {
   res.status(500).json({
     success: false,
     message: error.message,
@@ -39,8 +30,7 @@ async function createOrder (req, res) {
 
 
 async function verifyPayment (req, res){
-  console.log("verify payment");
-  console.log(req.body);
+
   try {
     const {
       razorpay_order_id,

@@ -48,10 +48,9 @@ export default function PlaceOrder() {
   });
 
   const price = calculatePrice(
-    formData.pickupCity,
-    formData.dropCity,
-    Number(formData.weight),
-    formData.priority
+  formData.deliveryType,
+  Number(formData.weight),
+  formData.priority
   );
 
   const handleChange = (e) => {
@@ -106,14 +105,15 @@ export default function PlaceOrder() {
 
   const loadRazorpay = () => {
     return new Promise((resolve) => {
-      // Prevent loading the script multiple times
       if (window.Razorpay) {
         resolve(true);
         return;
       }
 
       const script = document.createElement("script");
-      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+
+      script.src =
+        "https://checkout.razorpay.com/v1/checkout.js";
 
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
@@ -122,164 +122,175 @@ export default function PlaceOrder() {
     });
   };
 
-const handleSubmit = async () => {
-  if (!validate()) return;
+  const handleSubmit = async () => {
+    if (!validate()) return;
 
-  try {
-    if (formData.paymentMethod === "cash") {
-      await createParcel({
-        ...formData,
-        paymentMethod: "cash",
-        paymentStatus: "pending",
+    try {
+      if (formData.paymentMethod === "cash") {
+        await createParcel({
+          ...formData,
+          paymentMethod: "cash",
+          paymentStatus: "pending",
+        });
+
+        alert("Order placed successfully");
+        return;
+      }
+
+      const loaded = await loadRazorpay();
+
+      if (!loaded) {
+        alert("Failed to load Razorpay SDK");
+        return;
+      }
+
+      const orderResponse = await createOrder({
+        deliveryType: formData.deliveryType,
+        weight: Number(formData.weight),
+        priority: formData.priority,
       });
 
-      alert("Order placed successfully");
-      return;
-    }
+      const order = orderResponse.order;
 
-    const loaded = await loadRazorpay();
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
 
-    if (!loaded) {
-      alert("Failed to load Razorpay SDK");
-      return;
-    }
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.id,
 
-    console.log("Creating Razorpay Order...");
+        name: "CargoConnect",
+        description: "Parcel Booking",
 
-    const orderResponse = await createOrder({
-      deliveryType: formData.deliveryType,
-      weight: Number(formData.weight),
-      priority: formData.priority,
-    });
-
-    console.log("Order Response :", orderResponse);
-
-    const order = orderResponse.order;
-
-    const options = {
-      key: import.meta.env.VITE_RAZORPAY_KEY,
-
-      amount: order.amount,
-      currency: order.currency,
-      order_id: order.id,
-
-      name: "CargoConnect",
-      description: "Parcel Booking",
-
-      prefill: {
-        name: user?.name || "",
-        email: user?.email || "",
-        contact: formData.senderMobile,
-      },
-
-      theme: {
-        color: "#E8734A",
-      },
-
-     
-
-      handler: async function (response) {
-        console.log("Payment Success");
-        console.log(response);
-
-        try {
-          const verify = await verifyPayment({
-            razorpay_order_id: response.razorpay_order_id,
-            razorpay_payment_id: response.razorpay_payment_id,
-            razorpay_signature: response.razorpay_signature,
-          });
-
-          console.log("Verify Response:", verify);
-
-          if (!verify.success) {
-            alert("Payment Verification Failed");
-            return;
-          }
-
-          await createParcel({
-            ...formData,
-            paymentMethod: "online",
-            paymentStatus: "completed",
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature,
-          });
-
-          alert("Order Placed Successfully");
-        } catch (err) {
-          console.log(err);
-          alert("Payment verified but Parcel creation failed.");
-        }
-      },
-
-      modal: {
-        ondismiss: function () {
-          console.log("Payment popup closed");
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: formData.senderMobile,
         },
-      },
-    };
 
-    console.log("Opening Razorpay");
+        theme: {
+          color: "#E8734A",
+        },
 
-    const rzp = new window.Razorpay(options);
+        handler: async function (response) {
+          try {
+            const verify = await verifyPayment({
+              razorpay_order_id:
+                response.razorpay_order_id,
 
-    rzp.on("payment.failed", function (response) {
-      console.log("Payment Failed");
-      console.log(response.error);
+              razorpay_payment_id:
+                response.razorpay_payment_id,
 
-      alert(response.error.description);
-    });
+              razorpay_signature:
+                response.razorpay_signature,
+            });
 
-    rzp.open();
-  } catch (err) {
-    console.log("Handle Submit Error");
-    console.log(err);
+            if (!verify.success) {
+              alert("Payment Verification Failed");
+              return;
+            }
 
-    if (err.response) {
-      console.log(err.response.data);
+            await createParcel({
+              ...formData,
+
+              paymentMethod: "online",
+              paymentStatus: "completed",
+
+              paymentId:
+                response.razorpay_payment_id,
+
+              orderId:
+                response.razorpay_order_id,
+
+              signature:
+                response.razorpay_signature,
+            });
+
+            alert("Order Placed Successfully");
+          } catch (err) {
+            console.log(
+              "Parcel creation error:",
+              err
+            );
+
+            alert(
+              "Payment verified but Parcel creation failed."
+            );
+          }
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+
+      rzp.on(
+        "payment.failed",
+        function (response) {
+          alert(response.error.description);
+        }
+      );
+
+      rzp.open();
+    } catch (err) {
+      console.log("Payment Error:", err);
+
+      alert(
+        err.response?.data?.message ||
+          "Payment Failed"
+      );
     }
+  };
 
-    alert(err.response?.data?.message || "Payment Failed");
-  }
-};
-return (
-  <div className="min-h-screen flex bg-[#FFFBF7]">
+  return (
+  <div className="flex h-screen overflow-hidden bg-[#FFF9F6]">
     <Sidebar />
 
-    <main className="flex-1 p-8">
-      <h1 className="text-3xl font-bold mb-8">
-        Place New Order
-      </h1>
+    <main className="ml-64 flex-1 h-screen overflow-hidden px-6 py-5">
+      {/* Page Header */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-[#1B1B2F]">
+          Place New Order
+        </h1>
 
-      <div className="grid xl:grid-cols-[1fr_380px] gap-6">
-        <div className="space-y-6">
+        <p className="text-sm text-slate-500 mt-1">
+          Enter shipment details and complete your order
+        </p>
+      </div>
 
-          <SenderDetails
-            formData={formData}
-            handleChange={handleChange}
-          />
+      <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 h-[calc(100vh-105px)]">
+        
+        {/* Left Side */}
+        <div className="min-w-0 flex flex-col gap-4 overflow-hidden">
 
-          <ReceiverDetails
-            formData={formData}
-            handleChange={handleChange}
-          />
+          {/* Sender + Receiver */}
+          <div className="grid grid-cols-2 gap-4">
+            <SenderDetails
+              formData={formData}
+              handleChange={handleChange}
+            />
 
+            <ReceiverDetails
+              formData={formData}
+              handleChange={handleChange}
+            />
+          </div>
+
+          {/* Order Details */}
           <OrderDetails
             formData={formData}
             handleChange={handleChange}
             calculatePrice={calculatePrice}
           />
-
         </div>
 
-        <PaymentCard
-          formData={formData}
-          handleChange={handleChange}
-          price={price}
-          loading={isPending}
-          onSubmit={handleSubmit}
-        />
-
+        <div className="min-w-0">
+          <PaymentCard
+            formData={formData}
+            handleChange={handleChange}
+            price={price}
+            loading={isPending}
+            onSubmit={handleSubmit}
+          />
+        </div>
       </div>
     </main>
   </div>

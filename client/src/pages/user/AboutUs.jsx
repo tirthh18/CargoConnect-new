@@ -20,7 +20,8 @@ export default function AboutUs() {
     <div className="min-h-screen flex bg-[#FFFBF7]">
       <Sidebar />
 
-      <main className="flex-1 px-8 py-10">
+        <main className="ml-64 min-h-screen w-[calc(100%-16rem)] px-8 py-8">
+
         <div className="max-w-5xl mx-auto">
 
           {/* Heading */}
