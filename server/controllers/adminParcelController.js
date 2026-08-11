@@ -1,40 +1,44 @@
 const Parcel = require("../models/Parcel");
 const updateStatus = require("../utils/updateStatus");
-const User = require("../models/User")
+const User = require("../models/User");
 // const User = require("../models/User");
 // const axios = require("axios");
 const { json } = require("express");
-
 
 async function getAdminParcels(req, res) {
   try {
     const adminCity = req.user.office.city;
 
-    const pickupParcels = await Parcel
-    .find({"pickup.city": adminCity}).populate("pickup.agent", "name")
-    .sort({ createdAt: -1 });
+    const pickupParcels = await Parcel.find({ "pickup.city": adminCity })
+      .populate("pickup.agent", "name")
+      .sort({ createdAt: -1 });
 
-    const deliveryParcels = await Parcel
-    .find({"delivery.city": adminCity, status: {$in: ["in_transit", "out_for_delivery"]},})
-    .populate("delivery.agent", "name")
-    .sort({ createdAt: -1 });
+    const deliveryParcels = await Parcel.find({
+      "delivery.city": adminCity,
+      status: { $in: ["in_transit", "out_for_delivery"] },
+    })
+      .populate("delivery.agent", "name")
+      .sort({ createdAt: -1 });
 
-
-    const pickupParcelCount = pickupParcels.filter((parcel) => ["pending", "out_for_pickup"].includes(parcel.status)).length;
+    const pickupParcelCount = pickupParcels.filter((parcel) =>
+      ["pending", "out_for_pickup"].includes(parcel.status),
+    ).length;
     const deliveryParcelCount = deliveryParcels.length;
 
-    const activeParcelCount =
-      pickupParcelCount + deliveryParcelCount;
+    const activeParcelCount = pickupParcelCount + deliveryParcelCount;
+    const totalAgents = await User.countDocuments({
+      role: "agent",
+      "office.city": adminCity,
+    });
 
     res.json({
       activeParcelCount,
       pickupParcelCount,
       deliveryParcelCount,
-
+      totalAgents,
       pickupParcels,
       deliveryParcels,
     });
-
   } catch (err) {
     console.error(err);
 
@@ -43,8 +47,6 @@ async function getAdminParcels(req, res) {
     });
   }
 }
-
-
 
 async function updateParcelStatus(req, res) {
   try {
@@ -63,8 +65,8 @@ async function updateParcelStatus(req, res) {
 
 async function assignAgent(req, res) {
   try {
-    const { id } = req.params;      // Parcel ID from URL
-    const { agentId } = req.body;   // Agent ID from request body
+    const { id } = req.params; // Parcel ID from URL
+    const { agentId } = req.body; // Agent ID from request body
 
     if (!id || !agentId) {
       return res.status(400).json({
@@ -106,7 +108,6 @@ async function assignAgent(req, res) {
       message: "Agent assigned successfully",
       parcel,
     });
-
   } catch (err) {
     console.error(err);
 
@@ -115,7 +116,6 @@ async function assignAgent(req, res) {
     });
   }
 }
-
 
 module.exports = {
   getAdminParcels,
