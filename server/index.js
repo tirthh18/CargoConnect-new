@@ -14,9 +14,12 @@ const paymentRoutes = require("./routes/paymentRoutes");
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:8081', // React app origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+    origin: [
+        'http://localhost:8081',
+        'https://cargo-connect-new.vercel.app'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    credentials: true
 };
 app.use(cors(corsOptions)); 
 app.use(cookieParser());
