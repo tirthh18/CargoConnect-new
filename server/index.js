@@ -16,7 +16,7 @@ const app = express();
 const corsOptions = {
     origin: [
         'http://localhost:8081',
-        'https://cargo-connect-new.vercel.app'
+        'https://cargoconnect-web.vercel.app'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     credentials: true
