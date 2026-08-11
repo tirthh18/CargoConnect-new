@@ -258,10 +258,8 @@ export default function PlaceOrder() {
 
       <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 h-[calc(100vh-105px)]">
         
-        {/* Left Side */}
         <div className="min-w-0 flex flex-col gap-4 overflow-hidden">
 
-          {/* Sender + Receiver */}
           <div className="grid grid-cols-2 gap-4">
             <SenderDetails
               formData={formData}

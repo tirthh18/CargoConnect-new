@@ -4,6 +4,8 @@ server/node_modules/
 client/.env
 server/.env
 
+server/seedUsers.js
+
 client/dist/
 server/dist/
 

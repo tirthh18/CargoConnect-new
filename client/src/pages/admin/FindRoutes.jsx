@@ -19,10 +19,12 @@ export default function FindRoutes() {
   const parcels = parcelData?.parcels || [];
   const agents = agentData?.agents || [];
   const selectedAgentObject = agents.find((agent) => agent._id === selectedAgent) || null;
+ 
   const optimizedRoute = optimizeRoute.data?.route || parcels;
   const routeDistance = optimizeRoute.data?.distance || 0;
   const estimatedTime = optimizeRoute.data?.estimatedTime || 0;
   const routeGeometry = optimizeRoute.data?.geometry || [];
+  const officeCoordinates = optimizeRoute.data?.office || null;
 
 
   const handleCalculateRoute = async () => {
@@ -98,7 +100,7 @@ export default function FindRoutes() {
           ))}
         </div>
 
-        <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_480px] gap-8 mt-10">
+        <div className="grid grid-cols-1 xl:grid-cols-[0.9fr_480px] gap-8 mt-10 items-start">
           {" "}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
             <div className="flex items-center justify-between mb-5">
@@ -153,6 +155,7 @@ export default function FindRoutes() {
                 parcels={parcels}
                 optimizedRoute={optimizedRoute}
                 routeGeometry={routeGeometry}
+                officeCoordinates={optimizeRoute.data?.office}
               />
             )}
           </div>

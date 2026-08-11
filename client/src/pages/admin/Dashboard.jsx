@@ -35,52 +35,23 @@ export default function Dashboard() {
   const [sortBy, setSortBy] = useState("newest");
   const [parcelTab, setParcelTab] = useState("pickup");
 
-  // =========================
-  // CURRENT PARCEL TYPE
-  // =========================
-
-  const parcels =
-    parcelTab === "pickup"
-      ? pickupParcels
-      : deliveryParcels;
-
-  // =========================
-  // FILTER + SORT PARCELS
-  // =========================
+  const parcels = parcelTab === "pickup" ? pickupParcels: deliveryParcels;
 
   const filteredParcels = [...parcels]
     .filter((parcel) => {
-      // Pickup:
-      // Only pending, out_for_pickup and picked_up
       if (parcelTab === "pickup") {
-        return [
-          "pending",
-          "out_for_pickup",
-          "picked_up",
-        ].includes(parcel.status);
+        return ["pending", "out_for_pickup", "picked_up",].includes(parcel.status);
       }
 
-      // Delivery:
-      // Show all delivery parcels
       return true;
     })
     .sort((a, b) => {
       if (sortBy === "newest") {
-        return (
-          new Date(b.createdAt) -
-          new Date(a.createdAt)
-        );
+        return ( new Date(b.createdAt) -new Date(a.createdAt));
       }
 
-      return (
-        new Date(a.createdAt) -
-        new Date(b.createdAt)
-      );
+      return (new Date(a.createdAt) -new Date(b.createdAt));
     });
-
-  // =========================
-  // ASSIGN AGENT
-  // =========================
 
   const handleAssign = (parcelId, agentId) => {
     assignParcel.mutate({
@@ -89,20 +60,10 @@ export default function Dashboard() {
     });
   };
 
-  // =========================
-  // STATUS CHANGE
-  // =========================
 
   const handleStatusChange = (id, status) => {
-    updateStatus.mutate({
-      id,
-      status,
-    });
+    updateStatus.mutate({ id, status,});
   };
-
-  // =========================
-  // LOADING
-  // =========================
 
   if (isLoading) {
     return (
@@ -124,10 +85,6 @@ export default function Dashboard() {
     );
   }
 
-  // =========================
-  // ERROR
-  // =========================
-
   if (isError) {
     return (
       <>
@@ -142,8 +99,7 @@ export default function Dashboard() {
             </h2>
 
             <p className="text-red-400 mt-2">
-              {error?.response?.data?.message ||
-                error?.message}
+              {error?.response?.data?.message ||error?.message}
             </p>
 
             <button
@@ -166,11 +122,7 @@ export default function Dashboard() {
 
       <main className="pt-16 h-screen flex flex-col bg-[#FFFAF7]">
 
-        {/* ================= HEADER ================= */}
-
         <div className="px-8 pt-2 shrink-0">
-
-          {/* ================= STATS ================= */}
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mt-4">
 
@@ -212,9 +164,6 @@ export default function Dashboard() {
 
           </div>
 
-
-          {/* ================= PICKUP / DELIVERY + SORT ================= */}
-
           <div className="flex items-center justify-between mt-4">
 
             <div className="flex items-center gap-3">
@@ -252,8 +201,6 @@ export default function Dashboard() {
 
         </div>
 
-
-        {/* ================= PARCEL AREA ================= */}
 
         <div className="px-10 pt-4 pb-5 flex-1 min-h-0">
 

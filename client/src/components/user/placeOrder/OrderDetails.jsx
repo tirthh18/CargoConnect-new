@@ -105,7 +105,7 @@ export default function OrderDetails({
                 onChange={handleChange}
                 className="accent-[#E8734A]"
               />
-              UPI
+              Online
             </label>
           </div>
         </div>
