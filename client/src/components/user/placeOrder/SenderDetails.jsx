@@ -3,10 +3,11 @@ import AddressAutocomplete from "./AdressAutocomplate";
 export default function SenderDetails({ formData, handleChange }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">Sender Details</h2>
+      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">
+        Sender Details
+      </h2>
 
       <div className="space-y-4">
-        {/* Full Name */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
           <label className="text-sm font-medium text-slate-600">
             Full Name
@@ -22,7 +23,6 @@ export default function SenderDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* Mobile Number */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
           <label className="text-sm font-medium text-slate-600">
             Mobile Number
@@ -39,23 +39,39 @@ export default function SenderDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* Pickup Address */}
         <div className="grid grid-cols-[130px_1fr] gap-4">
           <label className="text-sm font-medium text-slate-600 pt-2">
             Pickup Address
           </label>
 
           <AddressAutocomplete
-  value={formData.pickupAddress}
-  onChange={(value) =>  handleChange({ target: { name: "pickupAddress", value, }})}
-  onPlaceSelect={(place) => { handleChange({ target: { name: "pickupCoordinates", value: { lat: place.lat, lng: place.lng, }}});}}
-  placeholder="Enter pickup address"
-/>
+            value={formData.pickupAddress}
+            onChange={(value) =>
+              handleChange({
+                target: {
+                  name: "pickupAddress",
+                  value,
+                  place: null,
+                },
+              })
+            }
+            onPlaceSelect={(place) =>
+              handleChange({
+                target: {
+                  name: "pickupAddress",
+                  value: place.formattedAddress || place.address,
+                  place,
+                },
+              })
+            }
+            placeholder="Enter pickup address"
+          />
         </div>
 
-        {/* Pincode */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">Pincode</label>
+          <label className="text-sm font-medium text-slate-600">
+            Pincode
+          </label>
 
           <input
             type="text"
@@ -68,9 +84,10 @@ export default function SenderDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* City */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">City</label>
+          <label className="text-sm font-medium text-slate-600">
+            City
+          </label>
 
           <select
             name="pickupCity"

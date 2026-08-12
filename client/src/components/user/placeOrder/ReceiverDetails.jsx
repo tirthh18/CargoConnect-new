@@ -8,7 +8,6 @@ export default function ReceiverDetails({ formData, handleChange }) {
       </h2>
 
       <div className="space-y-4">
-        {/* Full Name */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
           <label className="text-sm font-medium text-slate-600">
             Full Name
@@ -24,7 +23,6 @@ export default function ReceiverDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* Mobile Number */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
           <label className="text-sm font-medium text-slate-600">
             Mobile Number
@@ -41,7 +39,6 @@ export default function ReceiverDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* Delivery Address */}
         <div className="grid grid-cols-[130px_1fr] gap-4">
           <label className="text-sm font-medium text-slate-600 pt-2">
             Delivery Address
@@ -51,20 +48,30 @@ export default function ReceiverDetails({ formData, handleChange }) {
             value={formData.dropAddress}
             onChange={(value) =>
               handleChange({
-                target: { name: "dropAddress", value, },
+                target: {
+                  name: "dropAddress",
+                  value,
+                  place: null,
+                },
               })
             }
-            onPlaceSelect={(place) => {
+            onPlaceSelect={(place) =>
               handleChange({
-                target: { name: "dropCoordinates", value: { lat: place.lat, lng: place.lng, }, },
-              });
-            }}
+                target: {
+                  name: "dropAddress",
+                  value: place.formattedAddress || place.address,
+                  place,
+                },
+              })
+            }
             placeholder="Enter delivery address"
           />
         </div>
-        {/* Pincode */}
+
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">Pincode</label>
+          <label className="text-sm font-medium text-slate-600">
+            Pincode
+          </label>
 
           <input
             type="text"
@@ -77,9 +84,10 @@ export default function ReceiverDetails({ formData, handleChange }) {
           />
         </div>
 
-        {/* City */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">City</label>
+          <label className="text-sm font-medium text-slate-600">
+            City
+          </label>
 
           <select
             name="dropCity"

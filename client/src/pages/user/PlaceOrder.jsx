@@ -19,7 +19,6 @@ export default function PlaceOrder() {
   const { user } = useAuth();
 
   const { mutateAsync: createParcel, isPending } = useCreateParcel();
-
   const { mutateAsync: createOrder } = useCreatePaymentOrder();
   const { mutateAsync: verifyPayment } = useVerifyPayment();
 
@@ -56,69 +55,87 @@ export default function PlaceOrder() {
   );
 
   const handleChange = (e) => {
-  const { name, value } = e.target;
+    const { name, value, place } = e.target;
 
-  setFormData((prev) => {
-    const updated = {
-      ...prev,
-      [name]: value,
-    };
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: value,
+      };
 
-    if (name === "pickupAddress") {
-      updated.pickupCoordinates = null;
-    }
-
-    if (name === "dropAddress") {
-      updated.dropCoordinates = null;
-    }
-
-    if (name === "pickupCity" || name === "dropCity") {
-      if (
-        updated.pickupCity &&
-        updated.dropCity &&
-        updated.pickupCity === updated.dropCity
-      ) {
-        updated.deliveryType = "local";
-      } else if (updated.pickupCity && updated.dropCity) {
-        updated.deliveryType = "intercity";
+      if (name === "pickupAddress") {
+        updated.pickupCoordinates = place
+          ? {
+              lat: place.lat,
+              lng: place.lng,
+            }
+          : null;
       }
-    }
 
-    return updated;
-  });
-};
+      if (name === "dropAddress") {
+        updated.dropCoordinates = place
+          ? {
+              lat: place.lat,
+              lng: place.lng,
+            }
+          : null;
+      }
+
+      if (name === "pickupCity" || name === "dropCity") {
+        if (
+          updated.pickupCity &&
+          updated.dropCity &&
+          updated.pickupCity === updated.dropCity
+        ) {
+          updated.deliveryType = "local";
+        } else if (updated.pickupCity && updated.dropCity) {
+          updated.deliveryType = "intercity";
+        }
+      }
+
+      return updated;
+    });
+  };
 
   const validate = () => {
-  console.log("FORM DATA:", formData);
+    if (
+      !formData.senderName ||
+      !formData.senderMobile ||
+      !formData.pickupAddress ||
+      !formData.pickupCity ||
+      !formData.pickupPincode ||
+      !formData.receiverName ||
+      !formData.receiverMobile ||
+      !formData.dropAddress ||
+      !formData.dropCity ||
+      !formData.dropPincode ||
+      !formData.selectedDate ||
+      !formData.priority ||
+      !formData.deliveryType ||
+      !formData.weight ||
+      !formData.paymentMethod
+    ) {
+      alert("Please fill all required fields.");
+      return false;
+    }
 
-  if (
-    !formData.senderName ||
-    !formData.senderMobile ||
-    !formData.pickupAddress ||
-    !formData.pickupCity ||
-    !formData.pickupPincode ||
-    !formData.receiverName ||
-    !formData.receiverMobile ||
-    !formData.dropAddress ||
-    !formData.dropCity ||
-    !formData.dropPincode ||
-    !formData.selectedDate ||
-    !formData.priority ||
-    !formData.deliveryType ||
-    !formData.weight ||
-    !formData.paymentMethod
-  ) {
-    alert("Please fill all required fields.");
-    return false;
-  }
+    if (
+      !formData.pickupCoordinates ||
+      !Number.isFinite(formData.pickupCoordinates.lat) ||
+      !Number.isFinite(formData.pickupCoordinates.lng) ||
+      !formData.dropCoordinates ||
+      !Number.isFinite(formData.dropCoordinates.lat) ||
+      !Number.isFinite(formData.dropCoordinates.lng)
+    ) {
+      alert(
+        "Please select a valid pickup or drop address from the suggestions."
+      );
+      return false;
+    }
 
-  if (!formData.pickupCoordinates || formData.dropCoordinates){
-    alert("Please select a valid pickup or drop address from the suggestions.");
-    return false;
-  }
+    return true;
+  };
 
-  return true;
-};
   const loadRazorpay = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -128,8 +145,7 @@ export default function PlaceOrder() {
 
       const script = document.createElement("script");
 
-      script.src =
-        "https://checkout.razorpay.com/v1/checkout.js";
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
 
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
@@ -170,7 +186,6 @@ export default function PlaceOrder() {
 
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY,
-
         amount: order.amount,
         currency: order.currency,
         order_id: order.id,
@@ -191,14 +206,9 @@ export default function PlaceOrder() {
         handler: async function (response) {
           try {
             const verify = await verifyPayment({
-              razorpay_order_id:
-                response.razorpay_order_id,
-
-              razorpay_payment_id:
-                response.razorpay_payment_id,
-
-              razorpay_signature:
-                response.razorpay_signature,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
             });
 
             if (!verify.success) {
@@ -210,45 +220,30 @@ export default function PlaceOrder() {
               ...formData,
               paymentMethod: "online",
               paymentStatus: "completed",
-              paymentId:
-                response.razorpay_payment_id,
-              orderId:
-                response.razorpay_order_id,
-              signature:
-                response.razorpay_signature,
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature,
             });
 
             alert("Order Placed Successfully");
           } catch (err) {
-            console.log(
-              "Parcel creation error:",
-              err
-            );
-
-            alert(
-              "Payment verified but Parcel creation failed."
-            );
+            console.log("Parcel creation error:", err);
+            alert("Payment verified but Parcel creation failed.");
           }
         },
       };
 
       const rzp = new window.Razorpay(options);
 
-      rzp.on(
-        "payment.failed",
-        function (response) {
-          alert(response.error.description);
-        }
-      );
+      rzp.on("payment.failed", function (response) {
+        alert(response.error.description);
+      });
 
       rzp.open();
     } catch (err) {
       console.log("Payment Error:", err);
 
-      alert(
-        err.response?.data?.message ||
-          "Payment Failed"
-      );
+      alert(err.response?.data?.message || "Payment Failed");
     }
   };
 
