@@ -11,19 +11,31 @@ import {
 import L from "../../../utils/leafletIcon";
 import "leaflet/dist/leaflet.css";
 
-const pickupIcon = new L.Icon({
-  iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png",
-  shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
-
-const deliveryIcon = new L.Icon({
-  iconUrl:"https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
-  shadowUrl:"https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-});
+const createNumberedIcon = (number) =>
+  L.divIcon({
+    className: "",
+    html: `
+      <div style="
+        width: 34px;
+        height: 34px;
+        background: #E8734A;
+        border: 3px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 15px;
+        font-weight: 700;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.35);
+      ">
+        ${number}
+      </div>
+    `,
+    iconSize: [34, 34],
+    iconAnchor: [17, 17],
+    popupAnchor: [0, -17],
+  });
 
 function FitBounds({ parcels, officeCoordinates }) {
   const map = useMap();
@@ -31,7 +43,11 @@ function FitBounds({ parcels, officeCoordinates }) {
   useEffect(() => {
     const bounds = [];
 
-    if ( officeCoordinates && officeCoordinates.lat != null &&officeCoordinates.lng != null) {
+    if (
+      officeCoordinates &&
+      officeCoordinates.lat != null &&
+      officeCoordinates.lng != null
+    ) {
       bounds.push([
         Number(officeCoordinates.lat),
         Number(officeCoordinates.lng),
@@ -40,15 +56,27 @@ function FitBounds({ parcels, officeCoordinates }) {
 
     parcels.forEach((parcel) => {
       const point =
-        parcel.status === "out_for_pickup"? parcel.pickup: parcel.delivery;
+        parcel.status === "out_for_pickup"
+          ? parcel.pickup
+          : parcel.delivery;
 
-      if (point?.coordinates && point.coordinates.lat != null && point.coordinates.lng != null ) {
-        bounds.push([ Number(point.coordinates.lat), Number(point.coordinates.lng),]);
+      if (
+        point?.coordinates &&
+        point.coordinates.lat != null &&
+        point.coordinates.lng != null
+      ) {
+        bounds.push([
+          Number(point.coordinates.lat),
+          Number(point.coordinates.lng),
+        ]);
       }
     });
 
     if (bounds.length > 0) {
-      map.fitBounds(bounds, { padding: [70, 70], maxZoom: 13, });
+      map.fitBounds(bounds, {
+        padding: [70, 70],
+        maxZoom: 13,
+      });
     }
   }, [parcels, officeCoordinates, map]);
 
@@ -63,11 +91,15 @@ export default function RouteMap({
 }) {
   const route =
     optimizedRoute && optimizedRoute.length > 0
-      ? optimizedRoute : parcels;
+      ? optimizedRoute
+      : parcels;
 
   const polyline = (routeGeometry || [])
     .filter(
-      (point) => point && point.lat != null && point.lng != null
+      (point) =>
+        point &&
+        point.lat != null &&
+        point.lng != null
     )
     .map((point) => [
       Number(point.lat),
@@ -87,7 +119,9 @@ export default function RouteMap({
   return (
     <MapContainer
       center={
-        validOffice ? [validOffice.lat, validOffice.lng] : [22.6915, 72.8633]
+        validOffice
+          ? [validOffice.lat, validOffice.lng]
+          : [22.6915, 72.8633]
       }
       zoom={12}
       className="h-[700px] w-full rounded-xl z-0"
@@ -103,8 +137,6 @@ export default function RouteMap({
         officeCoordinates={validOffice}
       />
 
-      {/* ================= OFFICE MARKER ================= */}
-
       {validOffice && (
         <Marker
           position={[
@@ -117,14 +149,11 @@ export default function RouteMap({
               <h3 className="font-bold">
                 CargoConnect Office
               </h3>
-
               <p>Starting Point</p>
             </div>
           </Popup>
         </Marker>
       )}
-
-      {/* ================= PARCEL MARKERS ================= */}
 
       {route.map((parcel, index) => {
         const isPickup =
@@ -149,11 +178,7 @@ export default function RouteMap({
               Number(point.coordinates.lat),
               Number(point.coordinates.lng),
             ]}
-            icon={
-              isPickup
-                ? pickupIcon
-                : deliveryIcon
-            }
+            icon={createNumberedIcon(index + 1)}
           >
             <Popup>
               <div className="space-y-2 min-w-[220px]">
@@ -181,8 +206,6 @@ export default function RouteMap({
           </Marker>
         );
       })}
-
-      {/* ================= OPTIMIZED ROUTE ================= */}
 
       {polyline.length > 1 && (
         <Polyline
