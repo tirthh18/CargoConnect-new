@@ -3,9 +3,7 @@ import AddressAutocomplete from "./AdressAutocomplate";
 export default function SenderDetails({ formData, handleChange }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">
-        Sender Details
-      </h2>
+      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">Sender Details</h2>
 
       <div className="space-y-4">
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
@@ -46,32 +44,34 @@ export default function SenderDetails({ formData, handleChange }) {
 
           <AddressAutocomplete
             value={formData.pickupAddress}
-            onChange={(value) =>
+            onChange={(value) => {
+              console.log("7. SENDER onChange:", value);
+
               handleChange({
                 target: {
                   name: "pickupAddress",
                   value,
                   place: null,
                 },
-              })
-            }
-            onPlaceSelect={(place) =>
+              });
+            }}
+            onPlaceSelect={(place) => {
+              console.log("8. SENDER onPlaceSelect:", place);
+
               handleChange({
                 target: {
                   name: "pickupAddress",
                   value: place.formattedAddress || place.address,
                   place,
                 },
-              })
-            }
+              });
+            }}
             placeholder="Enter pickup address"
           />
         </div>
 
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            Pincode
-          </label>
+          <label className="text-sm font-medium text-slate-600">Pincode</label>
 
           <input
             type="text"
@@ -85,9 +85,7 @@ export default function SenderDetails({ formData, handleChange }) {
         </div>
 
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            City
-          </label>
+          <label className="text-sm font-medium text-slate-600">City</label>
 
           <select
             name="pickupCity"

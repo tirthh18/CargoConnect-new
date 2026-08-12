@@ -55,87 +55,135 @@ export default function PlaceOrder() {
   );
 
   const handleChange = (e) => {
-    const { name, value, place } = e.target;
+  const { name, value, place } = e.target;
 
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        [name]: value,
-      };
+  console.log("11. HANDLE CHANGE");
+  console.log("NAME:", name);
+  console.log("VALUE:", value);
+  console.log("PLACE:", place);
 
-      if (name === "pickupAddress") {
-        updated.pickupCoordinates = place
-          ? {
-              lat: place.lat,
-              lng: place.lng,
-            }
-          : null;
+  setFormData((prev) => {
+    const updated = {
+      ...prev,
+      [name]: value,
+    };
+
+    if (name === "pickupAddress") {
+      updated.pickupCoordinates = place
+        ? {
+            lat: place.lat,
+            lng: place.lng,
+          }
+        : null;
+
+      console.log(
+        "12. NEW PICKUP COORDINATES:",
+        updated.pickupCoordinates
+      );
+    }
+
+    if (name === "dropAddress") {
+      updated.dropCoordinates = place
+        ? {
+            lat: place.lat,
+            lng: place.lng,
+          }
+        : null;
+
+      console.log(
+        "13. NEW DROP COORDINATES:",
+        updated.dropCoordinates
+      );
+    }
+
+    if (name === "pickupCity" || name === "dropCity") {
+      if (
+        updated.pickupCity &&
+        updated.dropCity &&
+        updated.pickupCity === updated.dropCity
+      ) {
+        updated.deliveryType = "local";
+      } else if (updated.pickupCity && updated.dropCity) {
+        updated.deliveryType = "intercity";
       }
+    }
 
-      if (name === "dropAddress") {
-        updated.dropCoordinates = place
-          ? {
-              lat: place.lat,
-              lng: place.lng,
-            }
-          : null;
-      }
+    console.log("14. UPDATED FORM DATA:", updated);
 
-      if (name === "pickupCity" || name === "dropCity") {
-        if (
-          updated.pickupCity &&
-          updated.dropCity &&
-          updated.pickupCity === updated.dropCity
-        ) {
-          updated.deliveryType = "local";
-        } else if (updated.pickupCity && updated.dropCity) {
-          updated.deliveryType = "intercity";
-        }
-      }
-
-      return updated;
-    });
-  };
+    return updated;
+  });
+};
 
   const validate = () => {
-    if (
-      !formData.senderName ||
-      !formData.senderMobile ||
-      !formData.pickupAddress ||
-      !formData.pickupCity ||
-      !formData.pickupPincode ||
-      !formData.receiverName ||
-      !formData.receiverMobile ||
-      !formData.dropAddress ||
-      !formData.dropCity ||
-      !formData.dropPincode ||
-      !formData.selectedDate ||
-      !formData.priority ||
-      !formData.deliveryType ||
-      !formData.weight ||
-      !formData.paymentMethod
-    ) {
-      alert("Please fill all required fields.");
-      return false;
-    }
+  console.log("========== VALIDATION START ==========");
 
-    if (
-      !formData.pickupCoordinates ||
-      !Number.isFinite(formData.pickupCoordinates.lat) ||
-      !Number.isFinite(formData.pickupCoordinates.lng) ||
-      !formData.dropCoordinates ||
-      !Number.isFinite(formData.dropCoordinates.lat) ||
-      !Number.isFinite(formData.dropCoordinates.lng)
-    ) {
-      alert(
-        "Please select a valid pickup or drop address from the suggestions."
-      );
-      return false;
-    }
+  console.log("15. FINAL FORM DATA:", formData);
 
-    return true;
-  };
+  console.log(
+    "16. PICKUP COORDINATES:",
+    formData.pickupCoordinates
+  );
 
+  console.log(
+    "17. DROP COORDINATES:",
+    formData.dropCoordinates
+  );
+
+  console.log(
+    "18. PICKUP LAT:",
+    formData.pickupCoordinates?.lat,
+    "TYPE:",
+    typeof formData.pickupCoordinates?.lat
+  );
+
+  console.log(
+    "19. PICKUP LNG:",
+    formData.pickupCoordinates?.lng,
+    "TYPE:",
+    typeof formData.pickupCoordinates?.lng
+  );
+
+  console.log(
+    "20. DROP LAT:",
+    formData.dropCoordinates?.lat,
+    "TYPE:",
+    typeof formData.dropCoordinates?.lat
+  );
+
+  console.log(
+    "21. DROP LNG:",
+    formData.dropCoordinates?.lng,
+    "TYPE:",
+    typeof formData.dropCoordinates?.lng
+  );
+
+  const pickupValid =
+    formData.pickupCoordinates &&
+    Number.isFinite(Number(formData.pickupCoordinates.lat)) &&
+    Number.isFinite(Number(formData.pickupCoordinates.lng));
+
+  const dropValid =
+    formData.dropCoordinates &&
+    Number.isFinite(Number(formData.dropCoordinates.lat)) &&
+    Number.isFinite(Number(formData.dropCoordinates.lng));
+
+  console.log("22. PICKUP VALID:", pickupValid);
+  console.log("23. DROP VALID:", dropValid);
+
+  if (!pickupValid || !dropValid) {
+    console.log("24. ❌ COORDINATE VALIDATION FAILED");
+
+    alert(
+      "Please select a valid pickup or drop address from the suggestions."
+    );
+
+    return false;
+  }
+
+  console.log("25. ✅ COORDINATE VALIDATION PASSED");
+
+  return true;
+};
   const loadRazorpay = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) {

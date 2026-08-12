@@ -46,32 +46,34 @@ export default function ReceiverDetails({ formData, handleChange }) {
 
           <AddressAutocomplete
             value={formData.dropAddress}
-            onChange={(value) =>
+            onChange={(value) => {
+              console.log("9. RECEIVER onChange:", value);
+
               handleChange({
                 target: {
                   name: "dropAddress",
                   value,
                   place: null,
                 },
-              })
-            }
-            onPlaceSelect={(place) =>
+              });
+            }}
+            onPlaceSelect={(place) => {
+              console.log("10. RECEIVER onPlaceSelect:", place);
+
               handleChange({
                 target: {
                   name: "dropAddress",
                   value: place.formattedAddress || place.address,
                   place,
                 },
-              })
-            }
+              });
+            }}
             placeholder="Enter delivery address"
           />
         </div>
 
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            Pincode
-          </label>
+          <label className="text-sm font-medium text-slate-600">Pincode</label>
 
           <input
             type="text"
@@ -85,9 +87,7 @@ export default function ReceiverDetails({ formData, handleChange }) {
         </div>
 
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            City
-          </label>
+          <label className="text-sm font-medium text-slate-600">City</label>
 
           <select
             name="dropCity"
