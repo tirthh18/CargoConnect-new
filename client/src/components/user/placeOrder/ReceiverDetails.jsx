@@ -1,3 +1,5 @@
+import AddressAutocomplete from "./AdressAutocomplate";
+
 export default function ReceiverDetails({ formData, handleChange }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
@@ -45,20 +47,24 @@ export default function ReceiverDetails({ formData, handleChange }) {
             Delivery Address
           </label>
 
-          <textarea
-            rows={2}
-            name="dropAddress"
+          <AddressAutocomplete
             value={formData.dropAddress}
-            onChange={handleChange}
+            onChange={(value) =>
+              handleChange({
+                target: { name: "dropAddress", value, },
+              })
+            }
+            onPlaceSelect={(place) => {
+              handleChange({
+                target: { name: "dropCoordinates", value: { lat: place.lat, lng: place.lng, }, },
+              });
+            }}
             placeholder="Enter delivery address"
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 outline-none resize-none focus:border-[#E8734A] focus:ring-1 focus:ring-[#E8734A]/30"
           />
         </div>
         {/* Pincode */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            Pincode
-          </label>
+          <label className="text-sm font-medium text-slate-600">Pincode</label>
 
           <input
             type="text"
@@ -73,9 +79,7 @@ export default function ReceiverDetails({ formData, handleChange }) {
 
         {/* City */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            City
-          </label>
+          <label className="text-sm font-medium text-slate-600">City</label>
 
           <select
             name="dropCity"
@@ -88,8 +92,6 @@ export default function ReceiverDetails({ formData, handleChange }) {
             <option value="Amreli">Amreli</option>
           </select>
         </div>
-
-        
       </div>
     </div>
   );

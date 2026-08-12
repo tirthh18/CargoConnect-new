@@ -31,12 +31,14 @@ export default function PlaceOrder() {
     pickupAddress: "",
     pickupCity: "",
     pickupPincode: "",
+    pickupCoordinates: null,
 
     receiverName: "",
     receiverMobile: "",
     dropAddress: "",
     dropCity: "",
     dropPincode: "",
+    dropCoordinates: null,
 
     priority: "low",
     deliveryType: "local",
@@ -48,61 +50,75 @@ export default function PlaceOrder() {
   });
 
   const price = calculatePrice(
-  formData.deliveryType,
-  Number(formData.weight),
-  formData.priority
+    formData.deliveryType,
+    Number(formData.weight),
+    formData.priority
   );
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+  const { name, value } = e.target;
 
-    setFormData((prev) => {
-      const updated = {
-        ...prev,
-        [name]: value,
-      };
+  setFormData((prev) => {
+    const updated = {
+      ...prev,
+      [name]: value,
+    };
 
-      if (name === "pickupCity" || name === "dropCity") {
-        if (
-          updated.pickupCity &&
-          updated.dropCity &&
-          updated.pickupCity === updated.dropCity
-        ) {
-          updated.deliveryType = "local";
-        } else if (updated.pickupCity && updated.dropCity) {
-          updated.deliveryType = "intercity";
-        }
-      }
-
-      return updated;
-    });
-  };
-
-  const validate = () => {
-    if (
-      !formData.senderName ||
-      !formData.senderMobile ||
-      !formData.pickupAddress ||
-      !formData.pickupCity ||
-      !formData.pickupPincode ||
-      !formData.receiverName ||
-      !formData.receiverMobile ||
-      !formData.dropAddress ||
-      !formData.dropCity ||
-      !formData.dropPincode ||
-      !formData.selectedDate ||
-      !formData.priority ||
-      !formData.deliveryType ||
-      !formData.weight ||
-      !formData.paymentMethod
-    ) {
-      alert("Please fill all required fields.");
-      return false;
+    if (name === "pickupAddress") {
+      updated.pickupCoordinates = null;
     }
 
-    return true;
-  };
+    if (name === "dropAddress") {
+      updated.dropCoordinates = null;
+    }
 
+    if (name === "pickupCity" || name === "dropCity") {
+      if (
+        updated.pickupCity &&
+        updated.dropCity &&
+        updated.pickupCity === updated.dropCity
+      ) {
+        updated.deliveryType = "local";
+      } else if (updated.pickupCity && updated.dropCity) {
+        updated.deliveryType = "intercity";
+      }
+    }
+
+    return updated;
+  });
+};
+
+  const validate = () => {
+  console.log("FORM DATA:", formData);
+
+  if (
+    !formData.senderName ||
+    !formData.senderMobile ||
+    !formData.pickupAddress ||
+    !formData.pickupCity ||
+    !formData.pickupPincode ||
+    !formData.receiverName ||
+    !formData.receiverMobile ||
+    !formData.dropAddress ||
+    !formData.dropCity ||
+    !formData.dropPincode ||
+    !formData.selectedDate ||
+    !formData.priority ||
+    !formData.deliveryType ||
+    !formData.weight ||
+    !formData.paymentMethod
+  ) {
+    alert("Please fill all required fields.");
+    return false;
+  }
+
+  if (!formData.pickupCoordinates || formData.dropCoordinates){
+    alert("Please select a valid pickup or drop address from the suggestions.");
+    return false;
+  }
+
+  return true;
+};
   const loadRazorpay = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) {
@@ -192,16 +208,12 @@ export default function PlaceOrder() {
 
             await createParcel({
               ...formData,
-
               paymentMethod: "online",
               paymentStatus: "completed",
-
               paymentId:
                 response.razorpay_payment_id,
-
               orderId:
                 response.razorpay_order_id,
-
               signature:
                 response.razorpay_signature,
             });
@@ -241,56 +253,52 @@ export default function PlaceOrder() {
   };
 
   return (
-  <div className="flex h-screen overflow-hidden bg-[#FFF9F6]">
-    <Sidebar />
+    <div className="flex h-screen overflow-hidden bg-[#FFF9F6]">
+      <Sidebar />
 
-    <main className="ml-64 flex-1 h-screen overflow-hidden px-6 py-5">
-      {/* Page Header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-[#1B1B2F]">
-          Place New Order
-        </h1>
+      <main className="ml-64 flex-1 h-screen overflow-hidden px-6 py-5">
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold text-[#1B1B2F]">
+            Place New Order
+          </h1>
 
-        <p className="text-sm text-slate-500 mt-1">
-          Enter shipment details and complete your order
-        </p>
-      </div>
+          <p className="text-sm text-slate-500 mt-1">
+            Enter shipment details and complete your order
+          </p>
+        </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 h-[calc(100vh-105px)]">
-        
-        <div className="min-w-0 flex flex-col gap-4 overflow-hidden">
+        <div className="grid grid-cols-[minmax(0,1fr)_340px] gap-5 h-[calc(100vh-105px)]">
+          <div className="min-w-0 flex flex-col gap-4 overflow-hidden">
+            <div className="grid grid-cols-2 gap-4">
+              <SenderDetails
+                formData={formData}
+                handleChange={handleChange}
+              />
 
-          <div className="grid grid-cols-2 gap-4">
-            <SenderDetails
+              <ReceiverDetails
+                formData={formData}
+                handleChange={handleChange}
+              />
+            </div>
+
+            <OrderDetails
               formData={formData}
               handleChange={handleChange}
-            />
-
-            <ReceiverDetails
-              formData={formData}
-              handleChange={handleChange}
+              calculatePrice={calculatePrice}
             />
           </div>
 
-          {/* Order Details */}
-          <OrderDetails
-            formData={formData}
-            handleChange={handleChange}
-            calculatePrice={calculatePrice}
-          />
+          <div className="min-w-0">
+            <PaymentCard
+              formData={formData}
+              handleChange={handleChange}
+              price={price}
+              loading={isPending}
+              onSubmit={handleSubmit}
+            />
+          </div>
         </div>
-
-        <div className="min-w-0">
-          <PaymentCard
-            formData={formData}
-            handleChange={handleChange}
-            price={price}
-            loading={isPending}
-            onSubmit={handleSubmit}
-          />
-        </div>
-      </div>
-    </main>
-  </div>
-);
+      </main>
+    </div>
+  );
 }

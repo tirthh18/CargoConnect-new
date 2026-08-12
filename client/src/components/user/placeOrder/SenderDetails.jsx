@@ -1,9 +1,9 @@
+import AddressAutocomplete from "./AdressAutocomplate";
+
 export default function SenderDetails({ formData, handleChange }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">
-        Sender Details
-      </h2>
+      <h2 className="text-lg font-bold text-[#1B1B2F] mb-5">Sender Details</h2>
 
       <div className="space-y-4">
         {/* Full Name */}
@@ -45,21 +45,17 @@ export default function SenderDetails({ formData, handleChange }) {
             Pickup Address
           </label>
 
-          <textarea
-            rows={2}
-            name="pickupAddress"
-            value={formData.pickupAddress}
-            onChange={handleChange}
-            placeholder="Enter pickup address"
-            className="w-full border border-slate-300 rounded-lg px-3 py-2.5 outline-none resize-none focus:border-[#E8734A] focus:ring-1 focus:ring-[#E8734A]/30"
-          />
+          <AddressAutocomplete
+  value={formData.pickupAddress}
+  onChange={(value) =>  handleChange({ target: { name: "pickupAddress", value, }})}
+  onPlaceSelect={(place) => { handleChange({ target: { name: "pickupCoordinates", value: { lat: place.lat, lng: place.lng, }}});}}
+  placeholder="Enter pickup address"
+/>
         </div>
 
-         {/* Pincode */}
+        {/* Pincode */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            Pincode
-          </label>
+          <label className="text-sm font-medium text-slate-600">Pincode</label>
 
           <input
             type="text"
@@ -74,9 +70,7 @@ export default function SenderDetails({ formData, handleChange }) {
 
         {/* City */}
         <div className="grid grid-cols-[130px_1fr] items-center gap-4">
-          <label className="text-sm font-medium text-slate-600">
-            City
-          </label>
+          <label className="text-sm font-medium text-slate-600">City</label>
 
           <select
             name="pickupCity"
@@ -89,7 +83,6 @@ export default function SenderDetails({ formData, handleChange }) {
             <option value="Amreli">Amreli</option>
           </select>
         </div>
-
       </div>
     </div>
   );

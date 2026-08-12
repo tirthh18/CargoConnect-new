@@ -1,6 +1,5 @@
 const Parcel = require("../models/Parcel");
 const calculatePrice = require("../utils/calculatePrice");
-const getCoordinates = require("../utils/getCoordinates");
 const generateTrackingNumber = require("../utils/generateTrackingNumber");
 const updateStatus = require("../utils/updateStatus");
 
@@ -12,11 +11,13 @@ async function createParcel(req, res) {
       pickupAddress,
       pickupCity,
       pickupPincode,
+      pickupCoordinates,
       senderMobile,
       receiverName,
       dropAddress,
       dropCity,
       dropPincode,
+      dropCoordinates,
       receiverMobile,
       deliveryType,
       weight,
@@ -27,25 +28,9 @@ async function createParcel(req, res) {
 
     const totalPrice = calculatePrice(deliveryType, weight, priority);
 
-    const pickupCoordinates = await getCoordinates(
-      pickupAddress,
-      pickupCity,
-      "Gujarat",
-      "India",
-      pickupPincode,
-    );
-
-    const dropCoordinates = await getCoordinates(
-      dropAddress,
-      dropCity,
-      "Gujarat",
-      "India",
-      dropPincode,
-    );
-
     if (!pickupCoordinates || !dropCoordinates) {
       return res.status(400).json({
-        message: "Invalid pickup or delivery address.",
+        message: "please select valid pickup or delivery address.",
       });
     }
 
